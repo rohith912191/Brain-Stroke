@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroke Prediction Result</title>
+    <style>
+        body {
+            background-color: #1a1b1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/brain.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .result-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background: rgba(26, 27, 30, 0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .result-title {
+            font-size: 36px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+        }
+
+        .result-box {
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .high-risk {
+            border-color: #ff4757;
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), rgba(26, 27, 30, 0.7));
+        }
+
+        .medium-risk {
+            border-color: #ffb347;
+            background: linear-gradient(135deg, rgba(255, 179, 71, 0.15), rgba(26, 27, 30, 0.7));
+        }
+
+        .low-risk {
+            border-color: #2c974b;
+            background: linear-gradient(135deg, rgba(44, 151, 75, 0.1), rgba(26, 27, 30, 0.7));
+        }
+
+        .patient-details {
+            background: rgba(44, 45, 48, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .detail-item {
+            padding: 10px;
+        }
+
+        .detail-label {
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #2c974b, #3cba92);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 151, 75, 0.3);
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="result-header">
+            <h1 class="result-title">Stroke Risk Assessment</h1>
+        </div>
+
+        <div class="result-box {{ risk_class }}">
+            <h2>Prediction Result</h2>
+            <div class="risk-summary">Risk level: <strong>{{ risk_level }}</strong></div>
+        </div>
+
+        <div class="patient-details">
+            <h2>Patient Details</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Gender</div>
+                    <div class="detail-value">{{ patient_data.gender.title() }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Age</div>
+                    <div class="detail-value">{{ patient_data.age }} years</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Hypertension</div>
+                    <div class="detail-value">{{ "Yes" if patient_data.hypertension == 1 or patient_data.hypertension == '1' else "No" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Heart Disease</div>
+                    <div class="detail-value">{{ "Yes" if patient_data.heart_disease == 1 or patient_data.heart_disease == '1' else "No" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Residence Type</div>
+                    <div class="detail-value">{{ patient_data.residence.title() }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Glucose Level</div>
+                    <div class="detail-value">{{ patient_data.glucose }} mg/dL</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">BMI</div>
+                    <div class="detail-value">{{ "%.1f"|format(patient_data.bmi) }} kg/m²</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Smoking Status</div>
+                    <div class="detail-value">{{ patient_data.smoking_status.replace('_', ' ').title() }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{{ url_for('home') }}" class="btn">Start New Assessment</a>
+            <button onclick="window.print()" class="btn">Print Report</button>
+        </div>
+    </div>
+</body>
+</html>

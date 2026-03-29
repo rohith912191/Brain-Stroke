@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Brain Stroke Prediction</title>
+    <style>
+        body {
+            background-color: #1a1b1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/brain.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .edit-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background: rgba(26, 27, 30, 0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-title {
+            font-size: 32px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            background: rgba(44, 45, 48, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .form-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group label {
+            display: block;
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: rgba(44, 45, 48, 0.8);
+            border: 1px solid #3a3b3e;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #4ecdc4;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
+        }
+
+        .readonly-field {
+            background: rgba(44, 45, 48, 0.4);
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4ecdc4, #2c974b);
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .error-message {
+            background: rgba(255, 71, 87, 0.2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .bmi-display {
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="edit-container">
+        <div class="header-container">
+            <h1 class="header-title">Edit Profile</h1>
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('edit_profile') }}" onsubmit="return validateForm()">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" class="form-control" 
+                           value="{{ user.name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control readonly-field" 
+                           value="{{ user.email }}" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact">Contact Number</label>
+                    <input type="tel" id="contact" name="contact" class="form-control" 
+                           value="{{ user.contact }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" class="form-control readonly-field" 
+                           value="{{ user.dob.strftime('%Y-%m-%d') }}" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" step="0.1" id="height" name="height" class="form-control" 
+                           value="{{ user.height }}" required min="0"
+                           oninput="calculateBMI()">
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" step="0.1" id="weight" name="weight" class="form-control" 
+                           value="{{ user.weight }}" required min="0"
+                           oninput="calculateBMI()">
+                    <div class="bmi-display" id="bmi-display"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <input type="text" id="gender" class="form-control readonly-field" 
+                           value="{{ user.gender.title() }}" readonly>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('view_profile') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function calculateBMI() {
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const bmiDisplay = document.getElementById('bmi-display');
+
+            if (height > 0 && weight > 0) {
+                const heightInMeters = height / 100;
+                const bmi = weight / (heightInMeters * heightInMeters);
+                bmiDisplay.textContent = `Calculated BMI: ${bmi.toFixed(2)}`;
+            } else {
+                bmiDisplay.textContent = '';
+            }
+        }
+
+        function validateForm() {
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+
+            if (height <= 0 || weight <= 0) {
+                alert('Height and weight must be greater than 0');
+                return false;
+            }
+
+            return true;
+        }
+
+        calculateBMI();
+    </script>
+</body>
+</html>

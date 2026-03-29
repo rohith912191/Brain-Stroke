@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Brain Stroke Prediction</title>
+    <style>
+        body {
+            background-color: #1a1b1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/brain.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+            background: rgba(26, 27, 30, 0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-title {
+            font-size: 32px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4ecdc4, #2c974b);
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .profile-item {
+            background: rgba(44, 45, 48, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-label {
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-value {
+            color: white;
+            font-size: 18px;
+        }
+
+        .health-stats {
+            margin-top: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(44, 151, 75, 0.1));
+            border-radius: 12px;
+            border: 1px solid rgba(78, 205, 196, 0.2);
+        }
+
+        .health-stats h2 {
+            margin: 0 0 20px 0;
+            color: #4ecdc4;
+            font-size: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-container {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="header-container">
+            <h1 class="header-title">Profile Information</h1>
+            <div class="nav-buttons">
+                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                    ✏️ Edit Profile
+                </a>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                    🏠 Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-item">
+                <div class="profile-label">Full Name</div>
+                <div class="profile-value">{{ user.name }}</div>
+            </div>
+
+            <div class="profile-item">
+                <div class="profile-label">Email Address</div>
+                <div class="profile-value">{{ user.email }}</div>
+            </div>
+
+            <div class="profile-item">
+                <div class="profile-label">Gender</div>
+                <div class="profile-value">{{ user.gender.title() }}</div>
+            </div>
+
+            <div class="profile-item">
+                <div class="profile-label">Date of Birth</div>
+                <div class="profile-value">{{ user.dob.strftime('%B %d, %Y') }}</div>
+            </div>
+
+            <div class="profile-item">
+                <div class="profile-label">Contact Number</div>
+                <div class="profile-value">{{ user.contact }}</div>
+            </div>
+
+            <div class="profile-item">
+                <div class="profile-label">Age</div>
+                <div class="profile-value">{{ age }} years</div>
+            </div>
+
+            <div class="profile-item">
+                <div class="profile-label">Height</div>
+                <div class="profile-value">{{ user.height }} cm</div>
+            </div>
+
+            <div class="profile-item">
+                <div class="profile-label">Weight</div>
+                <div class="profile-value">{{ user.weight }} kg</div>
+            </div>
+        </div>
+
+        <div class="health-stats">
+            <h2>Health Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">{{ bmi }}</div>
+                    <div class="stat-label">Body Mass Index (BMI)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ age }}</div>
+                    <div class="stat-label">Current Age</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ "%.1f"|format(user.height) }}</div>
+                    <div class="stat-label">Height (cm)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

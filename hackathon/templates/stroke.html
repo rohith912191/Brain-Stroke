@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Stroke Prediction</title>
+    <style>
+        body {
+            background-color: #1a1b1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+            position: relative;
+        }
+        .btn-secondary {
+    background: transparent;
+    color: white;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(44, 45, 48, 0.3);
+            border-radius: 12px;
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-button {
+            background: linear-gradient(45deg, #4ecdc4, #2c974b);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: rgba(26, 27, 30, 0.95);
+            min-width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            margin-top: 10px;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .profile-info {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-info h3 {
+            margin: 0;
+            color: #4ecdc4;
+            font-size: 16px;
+        }
+
+        .profile-info p {
+            margin: 5px 0 0;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .dropdown-links a {
+            display: block;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .dropdown-links a:hover {
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .logout-link {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ff6b6b !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            position: relative;
+            background: rgba(26, 27, 30, 0.95);
+            margin: 15% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-error {
+            color: red;
+            background: rgba(255, 71, 87, 0.2);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        input:invalid:not(:placeholder-shown) + .error-message {
+            display: block;
+        }
+
+        .bmi-display {
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-button {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #ffffff;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-content.high-risk {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.95), rgba(26, 27, 30, 0.95));
+            border: 2px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .modal-content.low-risk {
+            background: linear-gradient(135deg, rgba(44, 151, 75, 0.95), rgba(26, 27, 30, 0.95));
+            border: 2px solid rgba(44, 151, 75, 0.3);
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/brain.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+            background: rgba(26, 27, 30, 0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .title-container {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            padding: 20px;
+        }
+
+        .page-title {
+            font-size: 48px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from {
+                text-shadow: 0 0 10px rgba(78, 205, 196, 0.2),
+                           0 0 20px rgba(78, 205, 196, 0.2),
+                           0 0 30px rgba(78, 205, 196, 0.2);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(255, 107, 107, 0.2),
+                           0 0 40px rgba(255, 107, 107, 0.2),
+                           0 0 60px rgba(255, 107, 107, 0.2);
+            }
+        }
+
+        .title-container::after {
+            content: '🧠';
+            font-size: 32px;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(-10px); }
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .form-group {
+            background: rgba(44, 45, 48, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            color: #e1e1e1;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            background-color: rgba(44, 45, 48, 0.8);
+            border: 1px solid #3a3b3e;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background-color: rgba(52, 53, 58, 0.9);
+            border-color: #4ecdc4;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
+        }
+
+        select.form-control {
+            appearance: none;
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath fill='%23ffffff' d='M0 0l6 6 6-6z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        .btn-predict {
+            background: linear-gradient(45deg, #2c974b, #3cba92);
+            color: white;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-predict:hover {
+            background: linear-gradient(45deg, #238c3d, #34a583);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(44, 151, 75, 0.4);
+        }
+
+        .result {
+            margin-top: 40px;
+            padding: 30px;
+            border-radius: 16px;
+            animation: fadeIn 0.5s ease-out;
+            text-align: center;
+        }
+
+        .result.high-risk {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.2), rgba(255, 71, 87, 0.1));
+            border: 2px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .result.low-risk {
+            background: linear-gradient(135deg, rgba(44, 151, 75, 0.2), rgba(44, 151, 75, 0.1));
+            border: 2px solid rgba(44, 151, 75, 0.3);
+        }
+
+        .result h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .result p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            body {
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 36px;
+            }
+
+            .title-container::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header-container">
+            <h1 class="page-title">Brain Stroke Prediction</h1>
+            <div class="user-menu">
+                <button class="profile-button" onclick="toggleProfileMenu()">
+                    {{ user.name }}
+                    <svg width="12" height="6" fill="none" stroke="currentColor">
+                        <path d="M1 1l5 4 5-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-info">
+                        <h3>{{ user.name }}</h3>
+                        <p>{{ user.email }}</p>
+                    </div>
+                    <div class="dropdown-links">
+                        <a href="{{ url_for('view_profile') }}">View Profile</a>
+                        <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+                        <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+                    </div>
+                </div>
+            </div>
+
+        {% if error %}
+        <div class="form-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('predict_stroke') }}" id="predictionForm" onsubmit="return validateForm()">
+            <div class="input-grid">
+                
+<div class="form-group">
+    <label for="gender">Gender</label>
+    <select class="form-control" id="gender" name="gender" required>
+        <option value="" disabled>Select gender</option>
+        <option value="male" {% if user.gender == 'male' %}selected{% endif %}>Male</option>
+        <option value="female" {% if user.gender == 'female' %}selected{% endif %}>Female</option>
+    </select>
+</div>
+<div class="form-group">
+    <label for="age">Age</label>
+    <input type="number" class="form-control" id="age" name="age" 
+           placeholder="Enter age" min="3" required
+           value="{{ age }}"
+           oninput="validateAge(this)">
+    <div class="error-message" id="age-error">Age must be greater than 3 years</div>
+</div>
+
+<div class="form-group">
+    <label for="height">Height (cm)</label>
+    <input type="number" step="0.1" class="form-control" id="height" name="height" 
+           placeholder="Enter height in cm" min="0.1" required
+           value="{{ user.height }}"
+           oninput="calculateBMI()">
+    <div class="error-message" id="height-error">Height must be greater than 0</div>
+</div>
+
+<div class="form-group">
+    <label for="weight">Weight (kg)</label>
+    <input type="number" step="0.1" class="form-control" id="weight" name="weight" 
+           placeholder="Enter weight in kg" min="0.1" required
+           value="{{ user.weight }}"
+           oninput="calculateBMI()">
+    <div class="error-message" id="weight-error">Weight must be greater than 0</div>
+    <div class="bmi-display" id="bmi-display"></div>
+</div>
+
+                <div class="form-group">
+                    <label for="hypertension">Hypertension</label>
+                    <select class="form-control" id="hypertension" name="hypertension" required>
+                        <option value="" disabled {% if not request.form.get('hypertension') %}selected{% endif %}>Select option</option>
+                        <option value="1" {% if request.form.get('hypertension') == '1' %}selected{% endif %}>Yes</option>
+                        <option value="0" {% if request.form.get('hypertension') == '0' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="heart_disease">Heart Disease</label>
+                    <select class="form-control" id="heart_disease" name="heart_disease" required>
+                        <option value="" disabled {% if not request.form.get('heart_disease') %}selected{% endif %}>Select option</option>
+                        <option value="1" {% if request.form.get('heart_disease') == '1' %}selected{% endif %}>Yes</option>
+                        <option value="0" {% if request.form.get('heart_disease') == '0' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="residence">Residence Type</label>
+                    <select class="form-control" id="residence" name="residence" required>
+                        <option value="" disabled {% if not request.form.get('residence') %}selected{% endif %}>Select residence type</option>
+                        <option value="urban" {% if request.form.get('residence') == 'urban' %}selected{% endif %}>Urban</option>
+                        <option value="rural" {% if request.form.get('residence') == 'rural' %}selected{% endif %}>Rural</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="glucose">Average Glucose Level (mg/dL)</label>
+                    <input type="number" step="0.1" class="form-control" id="glucose" name="glucose" 
+                           placeholder="Enter glucose level (e.g. 70)" min="40" required
+                           value="{{ request.form.get('glucose', '') }}"
+                           oninput="validateGlucose(this)">
+                    <div class="error-message" id="glucose-error">Please enter a realistic glucose level (at least 40 mg/dL)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="smoking_status">Smoking Status</label>
+                    <select class="form-control" id="smoking_status" name="smoking_status" required>
+                        <option value="" disabled {% if not request.form.get('smoking_status') %}selected{% endif %}>Select smoking status</option>
+                        <option value="formerly_smoked" {% if request.form.get('smoking_status') == 'formerly_smoked' %}selected{% endif %}>Formerly Smoked</option>
+                        <option value="never_smoked" {% if request.form.get('smoking_status') == 'never_smoked' %}selected{% endif %}>Never Smoked</option>
+                        <option value="smokes" {% if request.form.get('smoking_status') == 'smokes' %}selected{% endif %}>Smokes</option>
+                        <option value="unknown" {% if request.form.get('smoking_status') == 'unknown' %}selected{% endif %}>Unknown</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-predict">Brain Stroke Test Result</button>
+        </form>
+
+        <div id="resultModal" class="modal">
+            <div class="modal-content {{ 'high-risk' if prediction == 1 else 'low-risk' if prediction is defined }}">
+                <button class="close-button" onclick="closeModal()">&times;</button>
+                <h2>Prediction Result</h2>
+                {% if prediction is defined %}
+                <p>
+                    {% if prediction == 1 %}
+                    High risk of stroke detected. Please consult a healthcare professional.
+                    {% else %}
+                    Low risk of stroke detected. Continue maintaining a healthy lifestyle.
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script>
+        function validateAge(input) {
+            const errorDiv = document.getElementById('age-error');
+            const value = input.value;
+            if (value !== '' && Number(value) < 3) {
+                errorDiv.style.display = 'block';
+                input.setCustomValidity('Age must be greater than 3 years');
+            } else {
+                errorDiv.style.display = 'none';
+                input.setCustomValidity('');
+            }
+        }
+
+        function validateGlucose(input) {
+            const errorDiv = document.getElementById('glucose-error');
+            const value = input.value;
+            if (value.includes('.') && value.split('.')[1].length > 2) {
+                errorDiv.style.display = 'block';
+                input.setCustomValidity('Please enter up to 2 decimal places only');
+            } else if (value <= 0) {
+                errorDiv.style.display = 'block';
+                input.setCustomValidity('Glucose level must be greater than 0');
+            } else {
+                errorDiv.style.display = 'none';
+                input.setCustomValidity('');
+            }
+        }
+
+        function calculateBMI() {
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const bmiDisplay = document.getElementById('bmi-display');
+            const bmiInput = document.getElementById('bmi');
+
+            if (height > 0 && weight > 0) {
+                const heightInMeters = height / 100;
+                const bmi = weight / (heightInMeters * heightInMeters);
+                bmiDisplay.textContent = `Calculated BMI: ${bmi.toFixed(2)}`;
+                bmiInput.value = bmi.toFixed(2);
+            } else {
+                bmiDisplay.textContent = '';
+                bmiInput.value = '';
+            }
+        }
+
+        function validateForm() {
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const age = document.getElementById('age').value;
+            const glucose = document.getElementById('glucose').value;
+
+            if (height <= 0 || weight <= 0) {
+                alert('Height and weight must be greater than 0');
+                return false;
+            }
+
+            if (age < 3) {
+                alert('Age must be greater than 3 years');
+                return false;
+            }
+
+            if (glucose <= 0) {
+                alert('Glucose level must be greater than 0');
+                return false;
+            }
+
+            return true;
+        }
+
+        window.onload = function() {
+            {% if prediction is defined %}
+                document.getElementById('resultModal').style.display = 'block';
+            {% endif %}
+        };
+
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            let modal = document.getElementById('resultModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        function toggleProfileMenu() {
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.classList.toggle('show');
+    document.addEventListener('click', function(event) {
+        const isClickInside = dropdown.contains(event.target) || 
+                            event.target.closest('.profile-button');
+        
+        if (!isClickInside && dropdown.classList.contains('show')) {
+            dropdown.classList.remove('show');
+        }
+    });
+}
+    window.onload = function() {
+        calculateBMI();
+        {% if prediction is defined %}
+            document.getElementById('resultModal').style.display = 'block';
+        {% endif %}
+    };
+    </script>
+</body>
+</html>
